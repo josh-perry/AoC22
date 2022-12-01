@@ -19,10 +19,11 @@ def parse_elves():
     return elves
 
 
-"""
-Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
-"""
 def part_1():
+    """
+    Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
+    :return:
+    """
     print("Part 1")
     elves = parse_elves()
 
@@ -34,7 +35,20 @@ def part_1():
     print(most_calories)
 
 
+def part_2():
+    """
+    Find the top three Elves carrying the most Calories. How many Calories are those Elves carrying in total?
+    :return:
+    """
+    print("Part 2")
+    elves = parse_elves()
+    elves.sort(reverse=True, key=lambda x: sum(x.food))
+
+    foods = list(map(lambda x: sum(x.food), elves[0:3]))
+    print(sum(foods))
+
 
 def go():
     print("Day 1")
     part_1()
+    part_2()
