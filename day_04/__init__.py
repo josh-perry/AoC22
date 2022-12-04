@@ -1,5 +1,5 @@
 import re
-from dataclasses import  dataclass
+from dataclasses import dataclass
 
 
 @dataclass
@@ -22,6 +22,22 @@ def parse_input():
     return elf_pairs
 
 
+def check_contains(pair):
+    first = pair[0]
+    second = pair[1]
+
+    return first.first_section >= second.first_section and first.last_section <= second.last_section or \
+           first.first_section <= second.first_section and first.last_section >= second.last_section
+
+
+def check_overlaps(pair):
+    first = pair[0]
+    second = pair[1]
+
+    return second.first_section <= first.first_section <= second.last_section or \
+           second.first_section <= first.last_section <= second.last_section
+
+
 def part_1():
     """
     In how many assignment pairs does one range fully contain the other?
@@ -32,12 +48,7 @@ def part_1():
     conflicts = 0
 
     for pair in elf_pairs:
-        first = pair[0]
-        second = pair[1]
-
-        if first.first_section >= second.first_section and first.last_section <= second.last_section:
-            conflicts += 1
-        elif first.first_section <= second.first_section and first.last_section >= second.last_section:
+        if check_contains(pair):
             conflicts += 1
 
     print(conflicts)
@@ -45,11 +56,18 @@ def part_1():
 
 def part_2():
     """
-
+    In how many assignment pairs do the ranges overlap?
     :return:
     """
     print("Part 2")
-    pass
+    elf_pairs = parse_input()
+    conflicts = 0
+
+    for pair in elf_pairs:
+        if check_contains(pair) or check_overlaps(pair):
+            conflicts += 1
+
+    print(conflicts)
 
 
 def go():
