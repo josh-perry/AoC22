@@ -60,11 +60,20 @@ def parse_instructions():
     return instructions
 
 
-def execute_instructions(stack, instructions):
+def execute_instructions_one_by_one(stacks, instructions):
     for instruction in instructions:
         for i in range(0, instruction.amount_to_move):
-            box = stack[instruction.source_stack_index].pop()
-            stack[instruction.destination_stack_index].append(box)
+            box = stacks[instruction.source_stack_index].pop()
+            stacks[instruction.destination_stack_index].append(box)
+
+
+def execute_instructions_batched(stacks, instructions):
+    for instruction in instructions:
+        source_stack = stacks[instruction.source_stack_index]
+        batch_to_move = source_stack[len(source_stack) - instruction.amount_to_move:len(source_stack)]
+
+        stacks[instruction.destination_stack_index] += batch_to_move
+        stacks[instruction.source_stack_index] = source_stack[:len(source_stack) - len(batch_to_move)]
 
 
 def part_1():
@@ -75,18 +84,22 @@ def part_1():
     print("Part 1")
     stacks = parse_initial_stacks()
     instructions = parse_instructions()
-    execute_instructions(stacks, instructions)
+    execute_instructions_one_by_one(stacks, instructions)
 
     print("".join(map(lambda s: s[len(s) - 1], stacks)))
 
 
 def part_2():
     """
-
+    After the rearrangement procedure completes, what crate ends up on top of each stack?
     :return:
     """
     print("Part 2")
-    pass
+    stacks = parse_initial_stacks()
+    instructions = parse_instructions()
+    execute_instructions_batched(stacks, instructions)
+
+    print("".join(map(lambda s: s[len(s) - 1], stacks)))
 
 
 def go():
