@@ -36,6 +36,21 @@ def find_nodes_smaller_than(node, smaller_than, nodes):
     return nodes
 
 
+def find_nodes_bigger_than(node, bigger_than, nodes):
+    nodes = (nodes if nodes is not None else [])
+
+    for child_index in node.children:
+        child = node.children[child_index]
+
+        if child.is_directory:
+            find_nodes_bigger_than(child, bigger_than, nodes)
+
+        if node.size > bigger_than and node not in nodes:
+            nodes.append(node)
+
+    return nodes
+
+
 def parse_input():
     input_file = open("day_07/input", "r")
     command_regex = r"\$ (\w+) ?(.+)"
@@ -104,11 +119,22 @@ def part_1():
 
 def part_2():
     """
-
+    Find the smallest directory that, if deleted, would free up enough space on the filesystem to run the update. What
+    is the total size of that directory?
     :return:
     """
     print("Part 2")
-    pass
+    root_node = parse_input()
+
+    total_space = 70000000
+    space_required_for_update = 30000000
+    current_free_space = total_space - root_node.size
+    required_space_to_clear = abs(current_free_space - space_required_for_update)
+
+    nodes = find_nodes_bigger_than(root_node, required_space_to_clear, [])
+
+    smallest_size = min(map(lambda x: x.size, nodes))
+    print(smallest_size)
 
 
 def go():
