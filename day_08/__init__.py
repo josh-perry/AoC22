@@ -1,6 +1,14 @@
 from dataclasses import dataclass
 
 
+@dataclass
+class VisibilityLine:
+    starting_x: int
+    starting_y: int
+    offset_x: int
+    offset_y: int
+
+
 def parse_input():
     input_file = open("day_08/input", "r")
     grid = []
@@ -20,13 +28,6 @@ def parse_input():
 def count_visible_trees_from_outside(grid):
     grid_width = len(grid[0])
     grid_height = len(grid)
-
-    @dataclass
-    class VisibilityLine:
-        starting_x: int
-        starting_y: int
-        offset_x: int
-        offset_y: int
 
     visibility_lines = []
 
@@ -62,6 +63,48 @@ def count_visible_trees_from_outside(grid):
     return len(set(visible_trees))
 
 
+def calculate_viewing_distances_for_grid(grid):
+    grid_width = len(grid[0])
+    grid_height = len(grid)
+
+    viewing_distances_grid = []
+    visibility_lines = []
+
+    for y in range(0, grid_height):
+        row = []
+
+        for x in range(0, grid_width):
+            row.append([])
+
+            visibility_lines.append(VisibilityLine(x, y, 0, 1))
+            visibility_lines.append(VisibilityLine(x, y, 0, -1))
+            visibility_lines.append(VisibilityLine(x, y, -1, 0))
+            visibility_lines.append(VisibilityLine(x, y, 1, 0))
+
+        viewing_distances_grid.append(row)
+
+    for line in visibility_lines:
+        grid_x = line.starting_x
+        grid_y = line.starting_y
+
+        starting_tree = grid[line.starting_y][line.starting_x]
+        viewing_distance = 0
+
+        while grid_width > grid_x + line.offset_x >= 0 and grid_height > grid_y + line.offset_y >= 0:
+            grid_x += line.offset_x
+            grid_y += line.offset_y
+            tree = grid[grid_y][grid_x]
+
+            viewing_distance += 1
+
+            if tree >= starting_tree:
+                break
+
+        viewing_distances_grid[line.starting_y][line.starting_x].append(viewing_distance)
+
+    return viewing_distances_grid
+
+
 def part_1():
     """
     Consider your map; how many trees are visible from outside the grid?
@@ -76,11 +119,27 @@ def part_1():
 
 def part_2():
     """
-
+    Consider each tree on your map. What is the highest scenic score possible for any tree?
     :return:
     """
     print("Part 2")
-    pass
+    grid = parse_input()
+    viewing_distances = calculate_viewing_distances_for_grid(grid)
+    max_scenic_score = -1
+
+    grid_width = len(grid[0])
+    grid_height = len(grid)
+
+    for y in range(0, grid_height):
+        for x in range(0, grid_width):
+            score = 1
+
+            for distance in viewing_distances[y][x]:
+                score *= distance
+
+            max_scenic_score = max(max_scenic_score, score)
+
+    print(max_scenic_score)
 
 
 def go():
