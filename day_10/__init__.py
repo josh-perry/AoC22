@@ -65,11 +65,33 @@ def part_1():
 
 def part_2():
     """
-
+    Render the image given by your program. What eight capital letters appear on your CRT?
     :return:
     """
     print("Part 2")
-    pass
+    cpu = Cpu()
+    instructions = parse_input()
+
+    screen = []
+    screen_width, screen_height = 40, 6
+
+    for i in range(0, screen_height * screen_width):
+        screen.append(None)
+
+    for instruction in instructions:
+        for cycle in range(0, instruction.cycles):
+            if abs(cpu.x - (cpu.cycles % screen_width)) <= 1:
+                screen[cpu.cycles] = True
+
+            cpu.cycles += 1
+
+        cpu.execute_instruction(instruction)
+
+    for y in range(0, screen_height):
+        for x in range(0, screen_width):
+            print("#" if screen[x + screen_width * y] else ".", end="")
+
+        print("")
 
 
 def go():
