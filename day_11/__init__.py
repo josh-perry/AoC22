@@ -1,3 +1,4 @@
+import math
 import re
 from enum import Enum
 
@@ -88,7 +89,7 @@ def parse_input():
     return monkeys
 
 
-def simulate_monkey_business(monkeys, max_rounds):
+def simulate_monkey_business(monkeys, max_rounds, worry_adjustment):
     monkey_inspection_counts = []
 
     for r in range(0, max_rounds):
@@ -112,12 +113,13 @@ def simulate_monkey_business(monkeys, max_rounds):
                 elif monkey.operation_symbol == Operation.SUB:
                     item -= operation_value
 
-                item = item // 3
+                item = worry_adjustment(item)
 
                 if item % monkey.test_divisible_by == 0:
                     monkeys[monkey.true_monkey].items.append(item)
-                else:
-                    monkeys[monkey.false_monkey].items.append(item)
+                    continue
+
+                monkeys[monkey.false_monkey].items.append(item)
 
     return monkey_inspection_counts
 
@@ -131,7 +133,7 @@ def part_1():
     print("Part 1")
     monkeys = parse_input()
 
-    monkey_inspection_counts = simulate_monkey_business(monkeys, 20)
+    monkey_inspection_counts = simulate_monkey_business(monkeys, 20, lambda x: x // 3)
     top_inspection_counts = sorted(monkey_inspection_counts, reverse=True)[:2]
 
     monkey_business = 1
@@ -140,13 +142,32 @@ def part_1():
 
     print(monkey_business)
 
+
 def part_2():
     """
-
+    Worry levels are no longer divided by three after each item is inspected; you'll need to find another way to keep
+    your worry levels manageable. Starting again from the initial state in your puzzle input, what is the level of
+    monkey business after 10000 rounds?
     :return:
     """
     print("Part 2")
-    pass
+    monkeys = parse_input()
+
+    all_items = []
+    for item_list in map(lambda monkey: monkey.items, monkeys):
+        for item in item_list:
+            all_items.append(item)
+
+    worry_cap = math.prod(all_items)
+
+    monkey_inspection_counts = simulate_monkey_business(monkeys, 10000, lambda x: x % worry_cap)
+    top_inspection_counts = sorted(monkey_inspection_counts, reverse=True)[:2]
+
+    monkey_business = 1
+    for inspection_counts in top_inspection_counts:
+        monkey_business *= inspection_counts
+
+    print(monkey_business)
 
 
 def go():
