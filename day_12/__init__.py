@@ -1,4 +1,5 @@
 import collections
+import math
 from dataclasses import dataclass
 from string import ascii_lowercase
 
@@ -130,6 +131,10 @@ def pathfind(node_grid):
 
     while node is not starting_node:
         path.append(node)
+
+        if node not in came_from:
+            return None
+
         node = came_from[node]
 
     path.reverse()
@@ -152,11 +157,33 @@ def part_1():
 
 def part_2():
     """
-
+    What is the fewest steps required to move starting from any square with elevation a to the location that should get
+    the best signal?
     :return:
     """
     print("Part 2")
-    pass
+    grid = parse_input()
+    calculate_connecting_nodes(grid)
+
+    possible_starting_positions = []
+
+    for y in range(0, len(grid.nodes)):
+        row = grid.nodes[y]
+
+        for x in range(0, len(row)):
+            if grid.nodes[y][x].elevation == 0:
+                possible_starting_positions.append((y, x))
+
+    minimum_distance = math.inf
+
+    for possible_starting_position in possible_starting_positions:
+        grid.start_node_position = possible_starting_position
+        path = pathfind(grid)
+
+        if path:
+            minimum_distance = min(len(path), minimum_distance)
+
+    print(minimum_distance)
 
 
 def go():
