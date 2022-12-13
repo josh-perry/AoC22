@@ -1,21 +1,18 @@
 import json
+from functools import cmp_to_key
 
 
 def parse_input():
     input_file = open("day_13/input", "r")
-    packet_pairs = []
+    packets = []
 
-    packet_pair = []
     for line in input_file.readlines():
-        if len(packet_pair) in (0, 1):
-            packet_pair.append(json.loads(line.rstrip()))
+        if line.isspace():
             continue
 
-        packet_pairs.append(packet_pair)
-        packet_pair = []
+        packets.append(json.loads(line))
 
-    packet_pairs.append(packet_pair)
-    return packet_pairs
+    return packets
 
 
 def compare_pair(left, right):
@@ -32,22 +29,24 @@ def compare_pair(left, right):
 
     if not is_left_list and not is_right_list:
         if left == right:
-            return None
+            return 0
 
-        return left < right
+        return 1 if left < right else -1
 
     if is_left_list and is_right_list:
-        while True:
-            if len(left) == 0:
-                return True
+        for index in range(min(len(left), len(right))):
+            result = compare_pair(left[index], right[index])
 
-            if len(right) == 0:
-                return False
+            if not result:
+                continue
 
-            result = compare_pair(left.pop(0), right.pop(0))
+            return result
 
-            if result is not None:
-                return result
+        if len(left) < len(right):
+            return 1
+
+        if len(left) > len(right):
+            return -1
 
 
 def part_1():
@@ -56,13 +55,17 @@ def part_1():
     :return:
     """
     print("Part 1")
-    packet_pairs = parse_input()
+    packets = parse_input()
+    packet_pairs = []
+
+    for packet_index in range(0, len(packets), 2):
+        packet_pairs.append([packets[packet_index], packets[packet_index + 1]])
 
     total_indices = 0
 
     for pair_index in range(0, len(packet_pairs)):
         pair = packet_pairs[pair_index]
-        in_order = compare_pair(pair[0], pair[1])
+        in_order = compare_pair(pair[0], pair[1]) == 1
 
         if in_order:
             total_indices += pair_index + 1
@@ -72,11 +75,27 @@ def part_1():
 
 def part_2():
     """
-
+    Organize all of the packets into the correct order. What is the decoder key for the distress signal?
     :return:
     """
     print("Part 2")
-    pass
+    packets = parse_input()
+    divider_packets = [
+        [[2]],
+        [[6]]
+    ]
+
+    for divider_packet in divider_packets:
+        packets.append(divider_packet)
+
+    sorted_packets = sorted(packets, key=cmp_to_key(compare_pair), reverse=True)
+
+    decoder_key = 1
+    for divider_packet in divider_packets:
+        index = sorted_packets.index(divider_packet) + 1
+        decoder_key *= index
+
+    print(decoder_key)
 
 
 def go():
