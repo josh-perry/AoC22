@@ -60,7 +60,21 @@ def parse_input():
     return grid
 
 
-def simulate_sand_fall(sand_origin_x, sand_origin_y, grid):
+def get_tile(grid, x, y, floor_y=None):
+    if floor_y is not None:
+        if y == floor_y:
+            return Tile.WALL
+
+        if x > len(grid[y]) - 1:
+            resize_grid(grid, x + 1, len(grid))
+
+    if y < 0 or y > len(grid) - 1:
+        return None
+
+    return grid[y][x]
+
+
+def simulate_sand_fall(sand_origin_x, sand_origin_y, grid, floor_y=None):
     sand_count = 0
     sand_x, sand_y = None, None
 
@@ -68,21 +82,32 @@ def simulate_sand_fall(sand_origin_x, sand_origin_y, grid):
         sand_x = sand_x or sand_origin_x
         sand_y = sand_y or sand_origin_y
 
-        if sand_y + 1 >= len(grid):
+        tile_below = get_tile(grid, sand_x, sand_y + 1, floor_y)
+
+        if tile_below is None:
             return sand_count
 
-        if grid[sand_y + 1][sand_x] != Tile.AIR:
-            if grid[sand_y + 1][sand_x - 1] == Tile.AIR:
-                sand_x -= 1
-            elif grid[sand_y + 1][sand_x + 1] == Tile.AIR:
-                sand_x += 1
-            else:
-                grid[sand_y][sand_x] = Tile.SAND
-                sand_count += 1
+        if tile_below != Tile.AIR:
+            tile_below_left = get_tile(grid, sand_x - 1, sand_y + 1, floor_y)
 
-                sand_x = sand_origin_x
-                sand_y = sand_origin_y
+            if tile_below_left == Tile.AIR:
+                sand_x -= 1
                 continue
+
+            tile_below_right = get_tile(grid, sand_x + 1, sand_y + 1, floor_y)
+            if tile_below_right == Tile.AIR:
+                sand_x += 1
+                continue
+
+            grid[sand_y][sand_x] = Tile.SAND
+            sand_count += 1
+
+            if sand_x == sand_origin_x and sand_y == sand_origin_y:
+                return sand_count
+
+            sand_x = sand_origin_x
+            sand_y = sand_origin_y
+            continue
 
         sand_y = sand_y + 1
 
@@ -100,29 +125,18 @@ def part_1():
     print(settled_sand)
 
 
-def print_grid(grid):
-    for y in range(len(grid)):
-        for x in range(len(grid[y])):
-            symbol = "."
-
-            if grid[y][x] == Tile.WALL:
-                symbol = "#"
-
-            if grid[y][x] == Tile.SAND:
-                symbol = "o"
-
-            print(symbol, end="")
-
-        print("")
-
-
 def part_2():
     """
-
+    Using your scan, simulate the falling sand until the source of the sand becomes blocked. How many units of sand come
+    to rest?
     :return:
     """
     print("Part 2")
-    pass
+    grid = parse_input()
+    grid.append([Tile.AIR] * len(grid[0]))
+
+    settled_sand = simulate_sand_fall(500, 0, grid, len(grid))
+    print(settled_sand)
 
 
 def go():
