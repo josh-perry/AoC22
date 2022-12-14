@@ -11,6 +11,8 @@ import day_10
 import day_11
 import day_12
 import day_13
+import day_14
+
 
 if __name__ == '__main__':
     day_01.go()
@@ -26,3 +28,4 @@ if __name__ == '__main__':
     day_11.go()
     day_12.go()
     day_13.go()
+    day_14.go()
