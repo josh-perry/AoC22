@@ -47,6 +47,28 @@ def find_positions_with_no_beacon_for_row(sensor_results, y):
     return len(impossible_beacons) - len(confirmed_beacons)
 
 
+def get_tuning_frequency(sensor_results, max_coords):
+    for y in range(0, max_coords):
+        x = 0
+        while x < max_coords:
+            sensor_in_range = False
+
+            for sensor in sensor_results:
+                sensor_x, sensor_y = sensor.position[0], sensor.position[1]
+
+                distance = abs(sensor_x - x) + abs(sensor_y - y)
+
+                if distance <= sensor.distance:
+                    x = sensor_x + sensor.distance - abs(sensor_y - y)
+                    sensor_in_range = True
+                    break
+
+            if not sensor_in_range:
+                return 4000000 * x + y
+
+            x += 1
+
+
 def part_1():
     """
     Consult the report from the sensors you just deployed. In the row where y=2000000, how many positions cannot contain
@@ -61,11 +83,13 @@ def part_1():
 
 def part_2():
     """
-
+    Find the only possible position for the distress beacon. What is its tuning frequency?
     :return:
     """
     print("Part 2")
-    pass
+    sensor_results = parse_input()
+
+    print(get_tuning_frequency(sensor_results, 4000000))
 
 
 def go():
